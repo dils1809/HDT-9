@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 def crear_grafo_desde_archivo(ruta_archivo):
     """Crea y devuelve un grafo basado en un archivo de texto con las rutas."""
     G = nx.Graph()
-    with open(ruta_archivo, 'r') as file:
+    with open(ruta_archivo, 'r', encoding='utf-8') as file:
         for line in file:
             partes = line.strip().split(',')
-            origen = partes[0].strip('"').strip()
-            destino = partes[1].strip('"').strip()
+            origen = partes[0].strip().strip('"').title()  # Normaliza el nombre de la estación
+            destino = partes[1].strip().strip('"').title()  # Normaliza el nombre de la estación
             costo = int(partes[2].strip())
             G.add_edge(origen, destino, weight=costo)
             G.add_edge(destino, origen, weight=costo)  # Asegurar simetría
@@ -20,20 +20,21 @@ def dijkstra_desde_origen(G, origen):
 
 def dibujar_grafo(G):
     """Dibuja el grafo con matplotlib."""
-    pos = nx.spring_layout(G)
-    nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=2000, edge_color='k', linewidths=1, font_size=15)
+    pos = nx.spring_layout(G, seed=42)  # Agregando un seed para reproducibilidad
+    nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=2000, edge_color='k', linewidths=1, font_size=8)
     labels = nx.get_edge_attributes(G, 'weight')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, font_size=10)
     plt.show()
 
 def main():
     """Función principal que ejecuta el programa."""
     archivo_rutas = 'rutas.txt'
     G = crear_grafo_desde_archivo(archivo_rutas)
+    print("Nodos cargados en el grafo:", G.nodes)  # Verificación de los nodos cargados
     dibujar_grafo(G)
 
     while True:
-        origen = input("Ingrese el nombre de la estación de salida (deje en blanco para salir): ")
+        origen = input("Ingrese el nombre de la estación de salida (deje en blanco para salir): ").strip().title()
         if origen == "":
             break
         if origen in G:
